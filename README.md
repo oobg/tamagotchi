@@ -1,8 +1,8 @@
 # Tamagotchi 🥚
 
-브라우저에서 굴러가는 다마고치 스타일 가상 펫 게임입니다. Next.js App Router 위에서 Phaser가 펫을 그리고, Zustand가 단일 상태 원천이 되어 React UI 패널과 Phaser 씬을 동시에 구동합니다.
+브라우저에서 굴러가는 다마고치 스타일 가상 펫 게임입니다. Next.js App Router 위에서 Phaser가 펫을 그리고, Zustand 스토어 하나가 React UI 패널과 Phaser 씬을 함께 굴립니다.
 
-> **MVP 상태:** 시간 기반 상태 변화, 5단계 성장, 사용자 액션, care miss 누적, localStorage persist까지 동작합니다. 펫 그래픽은 아직 placeholder 도형이며, 추후 도트 sprite sheet로 교체 예정입니다.
+> **MVP 상태:** 시간 기반 상태 변화, 5단계 성장, 사용자 액션, care miss 누적, localStorage persist까지 동작합니다. 펫 그래픽은 아직 placeholder 도형이며, 도트 sprite sheet로 교체할 예정입니다.
 
 ## 핵심 메커닉
 
@@ -93,15 +93,15 @@ public/
     growth / debug)                            visibilitychange syncTime()
 ```
 
-- 펫 데이터는 **Zustand에만** 존재합니다. React state·Phaser scene 모두 직접 보유하지 않고 구독만 합니다.
-- 모든 사용자 액션은 먼저 `applyTimeDecay`로 시간을 동기화한 뒤 변형됩니다 — 액션 직전까지의 시간이 누락되지 않습니다.
+- 펫 데이터는 **Zustand에만** 존재합니다. React state와 Phaser scene 모두 직접 들고 있지 않고 구독만 합니다.
+- 모든 사용자 액션은 먼저 `applyTimeDecay`로 시간을 동기화한 뒤 상태를 바꿉니다 — 액션 직전까지의 시간이 빠지지 않습니다.
 - 페이지 마운트 시 `syncTime()`이 한 번 호출되어 앱이 꺼져 있던 시간이 즉시 반영됩니다.
 
 ## 에셋 정책 (현재 단계)
 
-- 펫 / 배경은 **Phaser 기본 도형(원·사각형·텍스트)으로만** 렌더됩니다.
+- 펫과 배경은 **Phaser 기본 도형(원, 사각형, 텍스트)으로만** 렌더됩니다.
 - 외부 이미지 다운로드, 생성된 sprite, 무작위 그래픽 자산은 추가하지 않습니다.
-- `game/animations/pet-animations.ts`의 8개 애니메이션 키(`idle`, `happy`, `hungry`, `sick`, `sleeping`, `dirty`, `eating`, `playing`)는 **미리 정의된 채로 비어 있으며**, 추후 sprite sheet를 `public/assets/pets/<theme>/` 아래에 두고 Preloader에서 등록하면 그대로 활성화됩니다.
+- `game/animations/pet-animations.ts`의 8개 애니메이션 키(`idle`, `happy`, `hungry`, `sick`, `sleeping`, `dirty`, `eating`, `playing`)는 **키만 정의되고 본체는 비어 있습니다.** sprite sheet를 `public/assets/pets/<theme>/` 아래에 두고 Preloader에서 등록하면 바로 활성화됩니다.
 - 에셋 경로는 `game/assets/pet-assets.ts`에서 설정 가능합니다.
 
 ## 향후 작업
@@ -121,11 +121,11 @@ MVP 범위 밖 (당분간 만들지 않음):
 
 ## log.js에 대하여
 
-원본 [phaserjs/template-nextjs](https://github.com/phaserjs/template-nextjs) 템플릿에서 상속된 `log.js`는 빌드/개발 시 Phaser Studio 측 `gryzor.co`에 익명 사용 통계(템플릿 이름·빌드 유형·Phaser 버전)를 한 번 전송합니다. 개인정보는 전송되지 않습니다. 끄려면 `npm run dev-nolog` / `npm run build-nolog`을 쓰거나 `package.json`의 `scripts`에서 `node log.js ... &` 부분을 제거하세요.
+원본 [phaserjs/template-nextjs](https://github.com/phaserjs/template-nextjs) 템플릿에서 따라온 `log.js`는 빌드/개발 시 Phaser Studio의 `gryzor.co`로 익명 사용 통계(템플릿 이름, 빌드 유형, Phaser 버전)를 한 번 전송합니다. 개인정보는 전송되지 않습니다. 끄려면 `npm run dev-nolog` / `npm run build-nolog`을 쓰거나, `package.json`의 `scripts`에서 `node log.js ... &` 부분을 빼면 됩니다.
 
 ## 크레딧
 
 원본 Next.js + Phaser 템플릿: [Phaser Studio](https://phaser.io) — [phaserjs/template-nextjs](https://github.com/phaserjs/template-nextjs).
-다마고치 게임 로직 / Zustand 통합 / App Router 마이그레이션: 본 레포 작업.
+다마고치 게임 로직 / Zustand 통합 / App Router 마이그레이션: 이 레포 작업.
 
 Phaser 로고와 캐릭터는 © 2011 - 2025 Phaser Studio Inc.
