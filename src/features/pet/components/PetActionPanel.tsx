@@ -4,8 +4,7 @@ import { usePetStore } from "@/stores/pet-store";
 
 export function PetActionPanel() {
     const isSleeping = usePetStore((s) => s.pet.isSleeping);
-    const { feed, play, sleep, wake, clean, heal, toilet, resetPet } =
-        usePetStore.getState();
+    const { feed, play, sleep, wake, clean, heal, toilet, resetPet } = usePetStore.getState();
 
     return (
         <div className="flex flex-col gap-3 rounded-lg border border-white/15 bg-black/40 p-4">

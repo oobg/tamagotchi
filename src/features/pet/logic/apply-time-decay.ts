@@ -46,10 +46,7 @@ export function applyTimeDecay(pet: PetState, now: number): PetState {
     health = clampStat(health);
 
     let careMissCount = pet.careMissCount;
-    if (
-        criticalCount >= 2 &&
-        minutes >= CARE_MISS_THRESHOLD_MINUTES / 2
-    ) {
+    if (criticalCount >= 2 && minutes >= CARE_MISS_THRESHOLD_MINUTES / 2) {
         careMissCount += Math.floor(minutes / CARE_MISS_THRESHOLD_MINUTES) + 1;
     } else if (criticalCount >= 1) {
         careMissCount += Math.floor(minutes / CARE_MISS_THRESHOLD_MINUTES);

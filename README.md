@@ -28,12 +28,12 @@ npm install
 npm run dev          # http://localhost:8080
 ```
 
-| 커맨드 | 설명 |
-|--------|------|
-| `npm install` | 의존성 설치 |
-| `npm run dev` | 개발 서버 실행 (포트 8080) |
-| `npm run build` | `dist/` 폴더에 정적 빌드 |
-| `npm run dev-nolog` / `build-nolog` | 익명 템플릿 통계 호출 없이 실행 (아래 *log.js* 참고) |
+| 커맨드                              | 설명                                                 |
+| ----------------------------------- | ---------------------------------------------------- |
+| `npm install`                       | 의존성 설치                                          |
+| `npm run dev`                       | 개발 서버 실행 (포트 8080)                           |
+| `npm run build`                     | `dist/` 폴더에 정적 빌드                             |
+| `npm run dev-nolog` / `build-nolog` | 익명 템플릿 통계 호출 없이 실행 (아래 _log.js_ 참고) |
 
 ## 프로젝트 구조
 
@@ -107,11 +107,13 @@ public/
 ## 향후 작업
 
 가까운 목표:
+
 - 도트 sprite sheet 도입 (`default` 테마)
 - 단계별 외형 변화
 - 사운드 / 효과음
 
 MVP 범위 밖 (당분간 만들지 않음):
+
 - 인증 / DB / API 라우트
 - 상점·인벤토리·미니게임·결혼·맵 해금
 - 멀티플레이어·친구·온라인 기능

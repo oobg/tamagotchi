@@ -2,7 +2,11 @@
 
 import { usePetStore } from "@/stores/pet-store";
 
-const ROWS: Array<{ key: "hunger" | "happiness" | "energy" | "hygiene" | "health"; label: string; color: string }> = [
+const ROWS: Array<{
+    key: "hunger" | "happiness" | "energy" | "hygiene" | "health";
+    label: string;
+    color: string;
+}> = [
     { key: "hunger", label: "Hunger", color: "bg-orange-400" },
     { key: "happiness", label: "Happiness", color: "bg-pink-400" },
     { key: "energy", label: "Energy", color: "bg-yellow-400" },

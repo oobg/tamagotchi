@@ -1,12 +1,6 @@
 export type PetStage = "egg" | "baby" | "child" | "teen" | "adult";
 
-export type PetMood =
-    | "idle"
-    | "happy"
-    | "hungry"
-    | "sick"
-    | "sleeping"
-    | "dirty";
+export type PetMood = "idle" | "happy" | "hungry" | "sick" | "sleeping" | "dirty";
 
 export interface PetState {
     id: string;

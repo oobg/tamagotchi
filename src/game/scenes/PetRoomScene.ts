@@ -47,12 +47,8 @@ export class PetRoomScene extends Scene {
     create() {
         const { width, height } = this.scale;
 
-        this.add
-            .rectangle(0, 0, width, height, 0x18181b)
-            .setOrigin(0, 0);
-        this.add
-            .rectangle(0, height * 0.7, width, height * 0.3, 0x27272a)
-            .setOrigin(0, 0);
+        this.add.rectangle(0, 0, width, height, 0x18181b).setOrigin(0, 0);
+        this.add.rectangle(0, height * 0.7, width, height * 0.3, 0x27272a).setOrigin(0, 0);
         this.add
             .text(width / 2, 24, "PET ROOM (placeholder)", {
                 fontFamily: "monospace",
@@ -123,8 +119,7 @@ export class PetRoomScene extends Scene {
         this.nameText.setText(`${pet.name}  (gen ${pet.generation})`);
         this.stageText.setText(`stage: ${pet.stage}`);
         this.moodText.setText(
-            `mood: ${mood}   anim-key: pet-${mood}` +
-                (pet.isSick ? "   [SICK]" : ""),
+            `mood: ${mood}   anim-key: pet-${mood}` + (pet.isSick ? "   [SICK]" : ""),
         );
         this.petBubble.setText(MOOD_LABEL[mood]);
 

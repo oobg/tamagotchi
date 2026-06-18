@@ -58,11 +58,9 @@ export const usePetStore = create<PetStore>()(
         (set) => ({
             pet: createInitialPet(Date.now()),
 
-            tick: () =>
-                set((state) => ({ pet: applyTimeDecay(state.pet, Date.now()) })),
+            tick: () => set((state) => ({ pet: applyTimeDecay(state.pet, Date.now()) })),
 
-            syncTime: () =>
-                set((state) => ({ pet: applyTimeDecay(state.pet, Date.now()) })),
+            syncTime: () => set((state) => ({ pet: applyTimeDecay(state.pet, Date.now()) })),
 
             feed: () =>
                 set((state) =>
@@ -83,15 +81,9 @@ export const usePetStore = create<PetStore>()(
                     })),
                 ),
 
-            sleep: () =>
-                set((state) =>
-                    mutate(state, (pet) => ({ ...pet, isSleeping: true })),
-                ),
+            sleep: () => set((state) => mutate(state, (pet) => ({ ...pet, isSleeping: true }))),
 
-            wake: () =>
-                set((state) =>
-                    mutate(state, (pet) => ({ ...pet, isSleeping: false })),
-                ),
+            wake: () => set((state) => mutate(state, (pet) => ({ ...pet, isSleeping: false }))),
 
             clean: () =>
                 set((state) =>
@@ -129,8 +121,7 @@ export const usePetStore = create<PetStore>()(
                     pet: createInitialPet(Date.now(), state.pet.generation + 1),
                 })),
 
-            renamePet: (name) =>
-                set((state) => ({ pet: { ...state.pet, name } })),
+            renamePet: (name) => set((state) => ({ pet: { ...state.pet, name } })),
         }),
         {
             name: "tamagotchi-pet-v1",
