@@ -15,7 +15,7 @@ export function CareMissIndicator() {
 
     return (
         <div className="flex items-center gap-2 rounded-md border border-white/20 bg-white/5 px-3 py-2">
-            <span className="text-xs uppercase tracking-widest text-white/60">Care Miss</span>
+            <span className="text-xs tracking-widest text-white/60">돌봄 놓침</span>
             <span className={`font-mono text-base ${color}`}>{careMissCount}</span>
         </div>
     );

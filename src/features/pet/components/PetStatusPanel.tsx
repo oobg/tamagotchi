@@ -7,11 +7,11 @@ const ROWS: Array<{
     label: string;
     color: string;
 }> = [
-    { key: "hunger", label: "Hunger", color: "bg-orange-400" },
-    { key: "happiness", label: "Happiness", color: "bg-pink-400" },
-    { key: "energy", label: "Energy", color: "bg-yellow-400" },
-    { key: "hygiene", label: "Hygiene", color: "bg-sky-400" },
-    { key: "health", label: "Health", color: "bg-emerald-400" },
+    { key: "hunger", label: "배고픔", color: "bg-orange-400" },
+    { key: "happiness", label: "행복", color: "bg-pink-400" },
+    { key: "energy", label: "활력", color: "bg-yellow-400" },
+    { key: "hygiene", label: "청결", color: "bg-sky-400" },
+    { key: "health", label: "건강", color: "bg-emerald-400" },
 ];
 
 export function PetStatusPanel() {
@@ -22,7 +22,7 @@ export function PetStatusPanel() {
             <header className="flex items-baseline justify-between">
                 <h2 className="text-lg font-semibold">{pet.name}</h2>
                 <span className="text-xs text-white/50">
-                    Gen {pet.generation} · {pet.id}
+                    {pet.generation}세대 · {pet.id}
                 </span>
             </header>
 
@@ -38,8 +38,8 @@ export function PetStatusPanel() {
             </div>
 
             <div className="flex flex-wrap gap-2 text-xs">
-                <Tag active={pet.isSleeping} label="😴 Sleeping" />
-                <Tag active={pet.isSick} label="🤒 Sick" tone="bad" />
+                <Tag active={pet.isSleeping} label="😴 자는 중" />
+                <Tag active={pet.isSick} label="🤒 아파요" tone="bad" />
                 <Tag active={pet.poopCount > 0} label={`💩 × ${pet.poopCount}`} tone="bad" />
             </div>
         </div>

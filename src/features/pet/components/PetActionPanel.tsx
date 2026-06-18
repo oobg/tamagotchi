@@ -8,21 +8,19 @@ export function PetActionPanel() {
 
     return (
         <div className="flex flex-col gap-3 rounded-lg border border-white/15 bg-black/40 p-4">
-            <h3 className="text-sm font-semibold uppercase tracking-widest text-white/60">
-                Actions
-            </h3>
+            <h3 className="text-sm font-semibold tracking-widest text-white/60">행동</h3>
             <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-                <ActionButton label="🍖 Feed" onClick={feed} disabled={isSleeping} />
-                <ActionButton label="🎾 Play" onClick={play} disabled={isSleeping} />
+                <ActionButton label="🍖 밥 주기" onClick={feed} disabled={isSleeping} />
+                <ActionButton label="🎾 놀기" onClick={play} disabled={isSleeping} />
                 {isSleeping ? (
-                    <ActionButton label="🌞 Wake" onClick={wake} />
+                    <ActionButton label="🌞 깨우기" onClick={wake} />
                 ) : (
-                    <ActionButton label="😴 Sleep" onClick={sleep} />
+                    <ActionButton label="😴 재우기" onClick={sleep} />
                 )}
-                <ActionButton label="🧼 Clean" onClick={clean} />
-                <ActionButton label="💊 Heal" onClick={heal} />
-                <ActionButton label="🚽 Toilet" onClick={toilet} />
-                <ActionButton label="♻️ Reset" onClick={resetPet} tone="danger" />
+                <ActionButton label="🧼 씻기기" onClick={clean} />
+                <ActionButton label="💊 치료" onClick={heal} />
+                <ActionButton label="🚽 화장실" onClick={toilet} />
+                <ActionButton label="♻️ 처음부터" onClick={resetPet} tone="danger" />
             </div>
         </div>
     );

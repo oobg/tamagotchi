@@ -18,7 +18,7 @@ export function GrowthStageBadge() {
 
     return (
         <div className="flex items-center gap-3 rounded-md border border-white/20 bg-white/5 px-3 py-2">
-            <span className="text-xs uppercase tracking-widest text-white/60">Stage</span>
+            <span className="text-xs tracking-widest text-white/60">성장 단계</span>
             <span className="font-semibold">{STAGE_LABEL[pet.stage]}</span>
             <div className="ml-auto h-2 w-24 overflow-hidden rounded-full bg-white/10">
                 <div

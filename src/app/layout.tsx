@@ -2,9 +2,8 @@ import "@/styles/globals.css";
 import type { Metadata, Viewport } from "next";
 
 export const metadata: Metadata = {
-    title: "Phaser Nextjs Template",
-    description:
-        "A Phaser 3 Next.js project template that demonstrates Next.js with React communication and uses Vite for bundling.",
+    title: "다마고치",
+    description: "브라우저에서 굴러가는 다마고치 스타일 가상 펫 게임이에요.",
     icons: { icon: "/favicon.png" },
 };
 
@@ -15,7 +14,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
     return (
-        <html lang="en">
+        <html lang="ko">
             <body>{children}</body>
         </html>
     );
