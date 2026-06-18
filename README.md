@@ -1,213 +1,129 @@
-# Phaser Next.js 템플릿 (Tamagotchi)
+# Tamagotchi 🥚
 
-Next.js 프레임워크 위에서 Phaser 게임을 구동하는 프로젝트 템플릿입니다. React ↔ Phaser 양방향 통신 브리지, 개발 중 핫 리로드, 프로덕션 빌드 스크립트가 포함되어 있습니다.
+브라우저에서 굴러가는 다마고치 스타일 가상 펫 게임입니다. Next.js App Router 위에서 Phaser가 펫을 그리고, Zustand가 단일 상태 원천이 되어 React UI 패널과 Phaser 씬을 동시에 구동합니다.
 
-### 버전
+> **MVP 상태:** 시간 기반 상태 변화, 5단계 성장, 사용자 액션, care miss 누적, localStorage persist까지 동작합니다. 펫 그래픽은 아직 placeholder 도형이며, 추후 도트 sprite sheet로 교체 예정입니다.
 
-이 템플릿은 다음 버전 기준으로 최신화되어 있습니다.
+## 핵심 메커닉
 
-- [Phaser 4](https://github.com/phaserjs/phaser)
-- [Next.js 15.3.1](https://github.com/vercel/next.js) — **App Router**
-- [React 19](https://react.dev/)
-- [TypeScript 5](https://github.com/microsoft/TypeScript)
+- **시간 감쇠** — `hunger`, `happiness`, `hygiene`은 시간이 지날수록 감소하고, `energy`는 깨어 있으면 줄고 자면 회복합니다. 임계 미만이 지속되면 `health`가 떨어지고 `careMissCount`가 누적됩니다.
+- **백그라운드 진행** — `lastUpdatedAt` 타임스탬프로 앱이 닫혀 있던 시간을 다시 열 때 한 번에 적용합니다.
+- **성장 단계** — `egg(1분) → baby(5분) → child(10분) → teen(15분) → adult` (튜닝 가능, `features/pet/logic/constants.ts`).
+- **사용자 액션** — Feed / Play / Sleep ↔ Wake / Clean / Heal / Toilet / Reset.
+- **부수 효과** — 일정 주기로 `poopCount`가 증가하고 청결도를 잠식, health가 낮으면 자동으로 `isSick`.
 
-![screenshot](screenshot.png)
+## 기술 스택
 
-## 요구 사항
+- **Next.js 15.3.1** — App Router, 정적 export (`output: 'export'`)
+- **React 19** — `"use client"` + `dynamic(..., { ssr: false })`로 Phaser 클라이언트 전용 로드
+- **Phaser 4** — 펫 씬 렌더링 (`PetRoomScene`)
+- **Zustand 5** — 상태 관리 + localStorage persist
+- **Tailwind CSS v4** — UI 패널 스타일링
+- **TypeScript 5**
 
-의존성 설치와 `npm` 스크립트 실행을 위해 [Node.js](https://nodejs.org)가 필요합니다.
+## 실행
 
-## 사용 가능한 커맨드
+```bash
+npm install
+npm run dev          # http://localhost:8080
+```
 
 | 커맨드 | 설명 |
-|---------|-------------|
-| `npm install` | 프로젝트 의존성 설치 |
+|--------|------|
+| `npm install` | 의존성 설치 |
 | `npm run dev` | 개발 서버 실행 (포트 8080) |
-| `npm run build` | `dist` 폴더에 프로덕션 빌드 생성 |
-| `npm run dev-nolog` | 익명 통계 전송 없이 개발 서버 실행 (아래 "log.js에 대하여" 참고) |
-| `npm run build-nolog` | 익명 통계 전송 없이 프로덕션 빌드 생성 (아래 "log.js에 대하여" 참고) |
-
-## 개발 시작하기
-
-레포를 클론한 뒤 프로젝트 디렉터리에서 `npm install`을 실행합니다. 이어서 `npm run dev`로 로컬 개발 서버를 띄울 수 있습니다.
-
-로컬 개발 서버는 기본적으로 `http://localhost:8080`에서 동작합니다. 포트를 바꾸거나 SSL을 적용하고 싶다면 Next.js 공식 문서를 참고하세요.
-
-서버가 실행 중이면 `src` 폴더의 어떤 파일이든 수정할 수 있습니다. Next.js가 자동으로 재컴파일한 뒤 브라우저를 리로드합니다.
+| `npm run build` | `dist/` 폴더에 정적 빌드 |
+| `npm run dev-nolog` / `build-nolog` | 익명 템플릿 통계 호출 없이 실행 (아래 *log.js* 참고) |
 
 ## 프로젝트 구조
 
-초기 구성은 다음과 같습니다. App Router 기반이므로 `src/app/` 하위에 라우트가 정의됩니다.
+```
+src/
+├── app/
+│   ├── layout.tsx              # 루트 레이아웃, metadata, globals.css
+│   └── page.tsx                # 클라이언트 페이지, App을 dynamic ssr:false로 로드
+├── App.tsx                     # Phaser 캔버스 + React 패널 컨테이너, tick 루프
+├── PhaserGame.tsx              # Phaser 게임 인스턴스 마운트/언마운트
+│
+├── stores/
+│   └── pet-store.ts            # Zustand persist 스토어 (단일 진실 원천)
+│
+├── features/pet/
+│   ├── types.ts                # PetState, PetStage, PetMood
+│   ├── logic/
+│   │   ├── apply-time-decay.ts # 경과 시간 → stat 감쇠, careMiss, poop, stage 재계산
+│   │   ├── growth.ts           # 단계 계산 / 진행률
+│   │   ├── mood.ts             # PetState → PetMood 도출
+│   │   ├── clamp.ts            # 0~100 포화
+│   │   └── constants.ts        # 감쇠율, 단계 지속 시간 (튜닝 포인트)
+│   └── components/
+│       ├── PetStatusPanel.tsx
+│       ├── PetActionPanel.tsx
+│       ├── GrowthStageBadge.tsx
+│       ├── CareMissIndicator.tsx
+│       └── DebugPanel.tsx
+│
+└── game/
+    ├── main.ts                 # Phaser config, PetRoomScene 등록
+    ├── scenes/
+    │   └── PetRoomScene.ts     # placeholder 도형으로 펫 렌더 + store 구독
+    ├── assets/
+    │   └── pet-assets.ts       # sprite sheet 경로 설정 (현재는 placeholder)
+    ├── animations/
+    │   └── pet-animations.ts   # idle/happy/hungry/sick/sleeping/dirty/eating/playing 키 정의
+    └── EventBus.ts             # React ↔ Phaser 보조 이벤트 버스
 
-| 경로 | 설명 |
-|-------------------------------|-----------------------------------------------------------------------------|
-| `src/app/layout.tsx` | App Router의 루트 레이아웃. `<html>`/`<body>` 정의, 전역 metadata, viewport, `globals.css` import를 담당합니다. |
-| `src/app/page.tsx` | 홈 라우트(`/`). Phaser가 `window`에 의존하므로 `dynamic(..., { ssr: false })`로 클라이언트 전용 로드 처리. |
-| `src/App.tsx` | Phaser를 클라이언트에서 구동하기 위한 미들웨어 컴포넌트 (`"use client"`). |
-| `src/PhaserGame.tsx` | Phaser 게임을 초기화하고 React ↔ Phaser 브리지 역할을 하는 컴포넌트 (`"use client"`). |
-| `src/game/EventBus.ts` | React와 Phaser 사이 통신용 단순 이벤트 버스. |
-| `src/game/main.ts` | **게임** 진입점. 게임 설정과 부트스트랩을 담당합니다. |
-| `src/game/scenes/` | Phaser Scene 파일들이 위치합니다. |
-| `src/styles/globals.css` | 페이지 레이아웃을 위한 간단한 전역 CSS. 여기에 Tailwind를 붙여도 됩니다. |
-| `public/favicon.png` | 기본 파비콘. |
-| `public/assets` | 게임에서 사용하는 정적 에셋 폴더. |
-
-## React 브리지
-
-`PhaserGame.tsx`가 React와 Phaser 사이의 다리입니다. Phaser 게임을 초기화하고 양쪽 이벤트를 중계합니다.
-
-React ↔ Phaser 통신은 `EventBus.ts`를 사용합니다. 양쪽 어디서든 emit/listen이 가능한 단순한 이벤트 버스입니다.
-
-```ts
-// React 쪽
-import { EventBus } from './EventBus';
-
-// 이벤트 발행
-EventBus.emit('event-name', data);
-
-// Phaser 쪽
-EventBus.on('event-name', (data) => {
-    // data로 무언가를 처리
-});
+public/
+└── assets/
+    └── pets/<theme>/sprite-sheet.png   # (예정) 도트 sprite + metadata.json
 ```
 
-추가로, `PhaserGame` 컴포넌트는 React `forwardRef`를 통해 Phaser 게임 인스턴스와 가장 최근에 활성화된 Scene을 외부로 노출합니다. 일반적인 React ref처럼 접근하면 됩니다.
+## 아키텍처
 
-## Phaser Scene 다루기
-
-Phaser에서 Scene은 게임의 심장과도 같습니다. 스프라이트, 게임 로직, Phaser 시스템 전반이 Scene 위에서 동작하며 여러 Scene을 동시에 돌릴 수도 있습니다. 이 템플릿은 React에서 현재 활성 Scene을 가져오는 통로를 제공합니다.
-
-`PhaserGame` 컴포넌트의 `currentActiveScene` 콜백을 통해 현재 Scene을 받을 수 있습니다. 이를 위해서는 Phaser Scene 쪽에서 `EventBus`로 `"current-scene-ready"` 이벤트를 발행해야 합니다. 템플릿의 모든 Scene이 이 패턴을 따릅니다.
-
-**중요:** 새 Scene을 추가할 때는 아래처럼 `EventBus`로 `"current-scene-ready"`를 발행해 React에 노출하세요.
-
-```ts
-class MyScene extends Phaser.Scene
-{
-    constructor ()
-    {
-        super('MyScene');
-    }
-
-    create ()
-    {
-        // 게임 오브젝트와 로직
-
-        // create 끝부분에서:
-        EventBus.emit('current-scene-ready', this);
-    }
-}
+```
+                    ┌──────────────────────────┐
+                    │   usePetStore (Zustand)  │
+                    │   + localStorage persist │
+                    └────────────┬─────────────┘
+                                 │ subscribe
+              ┌──────────────────┼──────────────────┐
+              │                  │                  │
+       React 패널           PetRoomScene       App.tsx tick 루프
+   (status / actions /     (Phaser canvas)    1초마다 tick()
+    growth / debug)                            visibilitychange syncTime()
 ```
 
-React에서 특정 Scene에 접근할 필요가 없다면 이벤트를 발행하지 않아도 됩니다. 또한 반드시 `create` 끝에서 발행할 필요도 없습니다. 예를 들어 네트워크 응답을 기다린 뒤에 발행해도 됩니다.
+- 펫 데이터는 **Zustand에만** 존재합니다. React state·Phaser scene 모두 직접 보유하지 않고 구독만 합니다.
+- 모든 사용자 액션은 먼저 `applyTimeDecay`로 시간을 동기화한 뒤 변형됩니다 — 액션 직전까지의 시간이 누락되지 않습니다.
+- 페이지 마운트 시 `syncTime()`이 한 번 호출되어 앱이 꺼져 있던 시간이 즉시 반영됩니다.
 
-### React 컴포넌트 사용 예시
+## 에셋 정책 (현재 단계)
 
-React 컴포넌트에서 Phaser 데이터에 접근하는 예시입니다.
+- 펫 / 배경은 **Phaser 기본 도형(원·사각형·텍스트)으로만** 렌더됩니다.
+- 외부 이미지 다운로드, 생성된 sprite, 무작위 그래픽 자산은 추가하지 않습니다.
+- `game/animations/pet-animations.ts`의 8개 애니메이션 키(`idle`, `happy`, `hungry`, `sick`, `sleeping`, `dirty`, `eating`, `playing`)는 **미리 정의된 채로 비어 있으며**, 추후 sprite sheet를 `public/assets/pets/<theme>/` 아래에 두고 Preloader에서 등록하면 그대로 활성화됩니다.
+- 에셋 경로는 `game/assets/pet-assets.ts`에서 설정 가능합니다.
 
-```ts
-import { useRef } from 'react';
-import { IRefPhaserGame } from "./PhaserGame";
+## 향후 작업
 
-const ReactComponent = () => {
+가까운 목표:
+- 도트 sprite sheet 도입 (`default` 테마)
+- 단계별 외형 변화
+- 사운드 / 효과음
 
-    const phaserRef = useRef<IRefPhaserGame>(null); // phaserRef.current로 접근
-
-    const onCurrentActiveScene = (scene: Phaser.Scene) => {
-        // Scene 변경 시 호출됨
-    }
-
-    return (
-        <PhaserGame ref={phaserRef} currentActiveScene={onCurrentActiveScene} />
-    );
-}
-```
-
-위 코드처럼 `useRef()`로 만든 ref를 `PhaserGame`에 연결하면, `phaserRef.current.game`에서 Phaser 게임 인스턴스를, `phaserRef.current.scene`에서 가장 최근 활성 Scene을 얻을 수 있습니다.
-
-`onCurrentActiveScene` 콜백은 EventBus에서 `"current-scene-ready"`가 발행될 때마다 호출됩니다.
-
-## 에셋 관리
-
-오디오, 이미지, 비디오 등 정적 게임 파일은 `public/assets` 폴더에 두세요. Phaser Loader에서 다음과 같이 참조할 수 있습니다.
-
-```ts
-preload ()
-{
-    // public/assets 폴더의 이미지 로드 예시
-    this.load.image('background', 'assets/bg.png');
-}
-```
-
-`npm run build`를 실행하면 정적 에셋이 `dist/assets` 폴더로 자동 복사됩니다.
-
-## 프로덕션 배포
-
-`npm run build`를 돌리면 코드가 번들링되어 `dist` 폴더에 저장되고, 프로젝트에서 import한 자산이나 `public` 폴더의 자산도 함께 출력됩니다. `next.config.mjs`에서 `output: 'export'`로 설정되어 있어 결과물은 **정적 사이트**입니다.
-
-게임을 배포하려면 `dist` 폴더의 *모든* 내용을 외부에 노출되는 정적 웹 서버에 업로드하면 됩니다.
-
-## 템플릿 커스터마이징
-
-### Next.js
-
-CSS·폰트 로더 등 빌드 설정을 바꾸고 싶다면 `next.config.mjs`를 수정하세요. 별도 설정 파일을 만들어 `package.json`의 npm 스크립트에서 타깃팅할 수도 있습니다. 자세한 내용은 [Next.js 공식 문서](https://nextjs.org/docs)를 참고하세요.
+MVP 범위 밖 (당분간 만들지 않음):
+- 인증 / DB / API 라우트
+- 상점·인벤토리·미니게임·결혼·맵 해금
+- 멀티플레이어·친구·온라인 기능
+- AI 이미지 생성
 
 ## log.js에 대하여
 
-`log.js`는 Phaser Studio Inc. 소유 도메인인 `gryzor.co`로 조용히 한 번 API 호출을 보냅니다. 전송되는 데이터는 3가지뿐입니다.
+원본 [phaserjs/template-nextjs](https://github.com/phaserjs/template-nextjs) 템플릿에서 상속된 `log.js`는 빌드/개발 시 Phaser Studio 측 `gryzor.co`에 익명 사용 통계(템플릿 이름·빌드 유형·Phaser 버전)를 한 번 전송합니다. 개인정보는 전송되지 않습니다. 끄려면 `npm run dev-nolog` / `npm run build-nolog`을 쓰거나 `package.json`의 `scripts`에서 `node log.js ... &` 부분을 제거하세요.
 
-1. 사용 중인 템플릿 이름 (vue, react 등)
-2. 빌드 유형 — `dev` 또는 `prod`
-3. 사용 중인 Phaser 버전
+## 크레딧
 
-개인정보는 어떤 것도 수집·전송되지 않습니다. 프로젝트 파일, 기기, 브라우저 정보도 보지 않습니다. `log.js` 파일을 직접 열어 확인할 수 있습니다.
+원본 Next.js + Phaser 템플릿: [Phaser Studio](https://phaser.io) — [phaserjs/template-nextjs](https://github.com/phaserjs/template-nextjs).
+다마고치 게임 로직 / Zustand 통합 / App Router 마이그레이션: 본 레포 작업.
 
-왜 수집할까요? 오픈소스다 보니 어떤 템플릿이 실제로 쓰이는지 알 길이 없습니다. 이 익명 신호가 어떤 템플릿에 투자할 가치가 있는지 판단하는 데 도움이 됩니다.
-
-데이터를 보내고 싶지 않다면 다음 명령을 쓰세요.
-
-개발:
-
-```bash
-npm run dev-nolog
-```
-
-빌드:
-
-```bash
-npm run build-nolog
-```
-
-또는 `log.js` 파일을 삭제하고 `package.json`의 `scripts` 섹션에서 호출 부분을 제거하면 완전히 비활성화됩니다.
-
-변경 전:
-
-```json
-"scripts": {
-    "dev": "node log.js dev & dev-template-script",
-    "build": "node log.js build & build-template-script"
-},
-```
-
-변경 후:
-
-```json
-"scripts": {
-    "dev": "dev-template-script",
-    "build": "build-template-script"
-},
-```
-
-## Phaser 커뮤니티
-
-**웹사이트:** [Phaser](https://phaser.io) · [Phaser Twitter](https://twitter.com/phaser_)
-**플레이:** [#madewithphaser](https://twitter.com/search?q=%23madewithphaser&src=typed_query&f=live)
-**학습:** [API 문서](https://newdocs.phaser.io) · [포럼](https://phaser.discourse.group/) · [StackOverflow](https://stackoverflow.com/questions/tagged/phaser-framework)
-**Discord:** [Phaser Discord](https://discord.gg/phaser)
-**예제:** 2000+ [Examples](https://labs.phaser.io)
-**뉴스레터:** [Phaser World](https://phaser.io/community/newsletter)
-
-원본 템플릿 제작: [Phaser Studio](mailto:support@phaser.io).
-
-Phaser 로고와 캐릭터는 © 2011 - 2025 Phaser Studio Inc. 모든 권리 보유.
+Phaser 로고와 캐릭터는 © 2011 - 2025 Phaser Studio Inc.
