@@ -16,6 +16,13 @@ export const PET_SPRITE_SHEETS: Record<string, PetSpriteSheetConfig> = {
         frameWidth: 32,
         frameHeight: 32,
     },
+    topema: {
+        key: "pet-topema",
+        path: `${PET_ASSET_BASE}/topema/sprite-sheet.png`,
+        metadataPath: `${PET_ASSET_BASE}/topema/metadata.json`,
+        frameWidth: 280,
+        frameHeight: 300,
+    },
 };
 
 export const ROOM_ASSET_BASE = "assets/rooms" as const;
