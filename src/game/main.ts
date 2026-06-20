@@ -6,7 +6,8 @@ const config: Phaser.Types.Core.GameConfig = {
     width: 480,
     height: 480,
     parent: "game-container",
-    backgroundColor: "#18181b",
+    // 다마고치 셸의 LCD 녹색이 그대로 비치도록 캔버스를 투명으로 둔다.
+    transparent: true,
     // pixelArt: 텍스처 보간을 nearest-neighbor로 → sprite scale을 줄여도 hood 끝
     // 같은 얇은 픽셀이 흐려져 잘려보이지 않음.
     pixelArt: true,

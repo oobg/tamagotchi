@@ -20,7 +20,7 @@ const STAGE_SCALE: Record<PetStage, number> = {
 };
 
 const MOOD_LABEL: Record<PetMood, string> = {
-    idle: "...",
+    idle: "",
     happy: "♪",
     hungry: "!",
     sick: "x_x",
@@ -33,9 +33,6 @@ const INITIAL_SHEET_KEY = TOPEMA_SHEETS.idle.key;
 export class PetRoomScene extends Scene {
     private petSprite!: Phaser.GameObjects.Sprite;
     private petBubble!: Phaser.GameObjects.Text;
-    private nameText!: Phaser.GameObjects.Text;
-    private stageText!: Phaser.GameObjects.Text;
-    private moodText!: Phaser.GameObjects.Text;
     private poopGroup!: Phaser.GameObjects.Group;
     private unsubscribe?: () => void;
     private baseY = 0;
@@ -54,9 +51,6 @@ export class PetRoomScene extends Scene {
 
     create() {
         const { width, height } = this.scale;
-
-        this.add.rectangle(0, 0, width, height, 0x18181b).setOrigin(0, 0);
-        this.add.rectangle(0, height * 0.7, width, height * 0.3, 0x27272a).setOrigin(0, 0);
 
         for (const meta of Object.values(TOPEMA_SHEETS)) {
             const tex = this.textures.get(meta.key);
@@ -79,42 +73,21 @@ export class PetRoomScene extends Scene {
         }
 
         const centerX = width / 2;
-        const floorY = height * 0.7;
-        this.baseY = floorY - 20;
+        // LCD 화면 안에서 펫이 중앙에 보이도록. 위·아래 HTML 오버레이를 피해
+        // 살짝 아래쪽에 자리를 잡아 펫 위로 mood 말풍선이 들어올 공간을 둔다.
+        this.baseY = height * 0.66;
 
         this.petSprite = this.add
             .sprite(centerX, this.baseY, INITIAL_SHEET_KEY, 0)
             .setOrigin(0.5, 0.95);
 
         this.petBubble = this.add
-            .text(centerX, floorY - 240, "", {
+            .text(centerX, this.baseY - 220, "", {
                 fontFamily: "monospace",
-                fontSize: "22px",
-                color: "#ffffff",
+                fontSize: "28px",
+                color: "#1f2c14",
             })
             .setOrigin(0.5);
-
-        this.nameText = this.add
-            .text(centerX, 28, "", {
-                fontFamily: "monospace",
-                fontSize: "18px",
-                color: "#fafafa",
-            })
-            .setOrigin(0.5);
-        this.stageText = this.add
-            .text(centerX, 54, "", {
-                fontFamily: "monospace",
-                fontSize: "13px",
-                color: "#a1a1aa",
-            })
-            .setOrigin(0.5);
-        this.moodText = this.add
-            .text(centerX, floorY + 20, "", {
-                fontFamily: "monospace",
-                fontSize: "13px",
-                color: "#d4d4d8",
-            })
-            .setOrigin(0.5, 0);
 
         this.poopGroup = this.add.group();
 
@@ -157,11 +130,6 @@ export class PetRoomScene extends Scene {
             this.petSprite.play(animKey);
         }
 
-        this.nameText.setText(`${pet.name}  (gen ${pet.generation})`);
-        this.stageText.setText(`stage: ${pet.stage}`);
-        this.moodText.setText(
-            `mood: ${mood}   anim-key: ${animKey}` + (pet.isSick ? "   [SICK]" : ""),
-        );
         this.petBubble.setText(MOOD_LABEL[mood]);
 
         this.petSprite.y = this.baseY;
@@ -173,9 +141,9 @@ export class PetRoomScene extends Scene {
     private renderPoops(count: number) {
         this.poopGroup.clear(true, true);
         const baseX = this.scale.width / 2 + 110;
-        const y = this.scale.height * 0.7 - 10;
+        const y = this.baseY - 8;
         for (let i = 0; i < Math.min(count, 5); i += 1) {
-            const dot = this.add.circle(baseX + i * 22, y, 8, 0x6b7280);
+            const dot = this.add.circle(baseX + i * 18, y, 6, 0x4a3322);
             this.poopGroup.add(dot);
         }
     }
