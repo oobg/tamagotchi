@@ -6,6 +6,9 @@ import type { PetState } from "@/features/pet/types";
 import { applyTimeDecay } from "@/features/pet/logic/apply-time-decay";
 import { clampStat } from "@/features/pet/logic/clamp";
 import { HEAL_RECOVERY_THRESHOLD } from "@/features/pet/logic/constants";
+import { EventBus } from "@/game/EventBus";
+
+export type PetActionEvent = "eating" | "playing";
 
 const INITIAL_STATS = {
     hunger: 70,
@@ -62,16 +65,18 @@ export const usePetStore = create<PetStore>()(
 
             syncTime: () => set((state) => ({ pet: applyTimeDecay(state.pet, Date.now()) })),
 
-            feed: () =>
+            feed: () => {
                 set((state) =>
                     mutate(state, (pet) => ({
                         ...pet,
                         hunger: clampStat(pet.hunger + 30),
                         happiness: clampStat(pet.happiness + 5),
                     })),
-                ),
+                );
+                EventBus.emit("pet:action", "eating" satisfies PetActionEvent);
+            },
 
-            play: () =>
+            play: () => {
                 set((state) =>
                     mutate(state, (pet) => ({
                         ...pet,
@@ -79,7 +84,9 @@ export const usePetStore = create<PetStore>()(
                         energy: clampStat(pet.energy - 15),
                         hygiene: clampStat(pet.hygiene - 5),
                     })),
-                ),
+                );
+                EventBus.emit("pet:action", "playing" satisfies PetActionEvent);
+            },
 
             sleep: () => set((state) => mutate(state, (pet) => ({ ...pet, isSleeping: true }))),
 

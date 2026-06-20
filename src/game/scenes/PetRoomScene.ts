@@ -1,17 +1,22 @@
 import { Scene } from "phaser";
 import { usePetStore } from "@/stores/pet-store";
+import type { PetActionEvent } from "@/stores/pet-store";
 import type { PetMood, PetStage, PetState } from "@/features/pet/types";
 import { deriveMood } from "@/features/pet/logic/mood";
 import { EventBus } from "../EventBus";
-import { PET_SPRITE_SHEETS } from "../assets/pet-assets";
-import { PET_ANIM_DEFS, moodAnimKey } from "../animations/pet-animations";
+import {
+    TOPEMA_FRAME_HEIGHT,
+    TOPEMA_FRAME_WIDTH,
+    TOPEMA_SHEETS,
+} from "../assets/topema-frames";
+import { PET_ANIM_DEFS, PET_ANIM_KEY, moodAnimKey } from "../animations/pet-animations";
 
 const STAGE_SCALE: Record<PetStage, number> = {
-    egg: 0.4,
-    baby: 0.5,
-    child: 0.6,
-    teen: 0.7,
-    adult: 0.8,
+    egg: 0.22,
+    baby: 0.28,
+    child: 0.34,
+    teen: 0.39,
+    adult: 0.45,
 };
 
 const MOOD_LABEL: Record<PetMood, string> = {
@@ -23,14 +28,7 @@ const MOOD_LABEL: Record<PetMood, string> = {
     dirty: "~",
 };
 
-const TOPEMA_SHEET = PET_SPRITE_SHEETS.topema;
-
-// 원본 PNG가 균일한 4×3 격자가 아니라 캐릭터 중심이 (251,205) 부터 좌우 ~313, 상하 ~321 간격으로 흩어져 있음.
-// 픽셀 centroid을 측정해서 각 캐릭터를 280×300 프레임 중앙에 맞춤.
-const TOPEMA_FRAME_WIDTH = 280;
-const TOPEMA_FRAME_HEIGHT = 300;
-const TOPEMA_COL_X = [111, 431, 740, 1050];
-const TOPEMA_ROW_Y = [55, 378, 697];
+const INITIAL_SHEET_KEY = TOPEMA_SHEETS.idle.key;
 
 export class PetRoomScene extends Scene {
     private petSprite!: Phaser.GameObjects.Sprite;
@@ -41,13 +39,17 @@ export class PetRoomScene extends Scene {
     private poopGroup!: Phaser.GameObjects.Group;
     private unsubscribe?: () => void;
     private baseY = 0;
+    private actionPlaying = false;
+    private onAction = (action: PetActionEvent) => this.playAction(action);
 
     constructor() {
         super("PetRoomScene");
     }
 
     preload() {
-        this.load.image(TOPEMA_SHEET.key, TOPEMA_SHEET.path);
+        for (const meta of Object.values(TOPEMA_SHEETS)) {
+            this.load.image(meta.key, meta.path);
+        }
     }
 
     create() {
@@ -56,21 +58,24 @@ export class PetRoomScene extends Scene {
         this.add.rectangle(0, 0, width, height, 0x18181b).setOrigin(0, 0);
         this.add.rectangle(0, height * 0.7, width, height * 0.3, 0x27272a).setOrigin(0, 0);
 
-        const tex = this.textures.get(TOPEMA_SHEET.key);
-        for (let row = 0; row < TOPEMA_ROW_Y.length; row += 1) {
-            for (let col = 0; col < TOPEMA_COL_X.length; col += 1) {
-                const index = row * TOPEMA_COL_X.length + col;
-                const name = String(index);
+        for (const meta of Object.values(TOPEMA_SHEETS)) {
+            const tex = this.textures.get(meta.key);
+            for (let i = 0; i < meta.frames.length; i += 1) {
+                const name = String(i);
                 if (tex.has(name)) continue;
-                tex.add(
-                    name,
-                    0,
-                    TOPEMA_COL_X[col],
-                    TOPEMA_ROW_Y[row],
-                    TOPEMA_FRAME_WIDTH,
-                    TOPEMA_FRAME_HEIGHT,
-                );
+                const { x, y } = meta.frames[i];
+                tex.add(name, 0, x, y, TOPEMA_FRAME_WIDTH, TOPEMA_FRAME_HEIGHT);
             }
+        }
+
+        for (const def of PET_ANIM_DEFS) {
+            if (this.anims.exists(def.key)) continue;
+            this.anims.create({
+                key: def.key,
+                frames: this.anims.generateFrameNumbers(def.sheetKey, { frames: def.frames }),
+                frameRate: def.frameRate,
+                repeat: def.repeat,
+            });
         }
 
         const centerX = width / 2;
@@ -78,21 +83,8 @@ export class PetRoomScene extends Scene {
         this.baseY = floorY - 20;
 
         this.petSprite = this.add
-            .sprite(centerX, this.baseY, TOPEMA_SHEET.key, 0)
+            .sprite(centerX, this.baseY, INITIAL_SHEET_KEY, 0)
             .setOrigin(0.5, 0.95);
-
-        const totalFrames = TOPEMA_ROW_Y.length * TOPEMA_COL_X.length;
-        for (const def of PET_ANIM_DEFS) {
-            if (this.anims.exists(def.key)) continue;
-            const safeFrames = def.frames.filter((f) => f < totalFrames);
-            if (safeFrames.length === 0) continue;
-            this.anims.create({
-                key: def.key,
-                frames: this.anims.generateFrameNumbers(TOPEMA_SHEET.key, { frames: safeFrames }),
-                frameRate: def.frameRate,
-                repeat: def.repeat,
-            });
-        }
 
         this.petBubble = this.add
             .text(centerX, floorY - 240, "", {
@@ -131,11 +123,25 @@ export class PetRoomScene extends Scene {
             this.applyPetState(state.pet);
         });
 
+        EventBus.on("pet:action", this.onAction);
+
         this.events.once("shutdown", () => {
             this.unsubscribe?.();
+            EventBus.off("pet:action", this.onAction);
         });
 
         EventBus.emit("current-scene-ready", this);
+    }
+
+    private playAction(action: PetActionEvent) {
+        if (!this.petSprite) return;
+        this.actionPlaying = true;
+        const animKey = PET_ANIM_KEY[action];
+        this.petSprite.play(animKey);
+        this.petSprite.once("animationcomplete", () => {
+            this.actionPlaying = false;
+            this.applyPetState(usePetStore.getState().pet);
+        });
     }
 
     private applyPetState(pet: PetState) {
@@ -146,7 +152,8 @@ export class PetRoomScene extends Scene {
         const scale = STAGE_SCALE[pet.stage];
 
         this.petSprite.setScale(scale);
-        if (this.petSprite.anims.currentAnim?.key !== animKey) {
+
+        if (!this.actionPlaying && this.petSprite.anims.currentAnim?.key !== animKey) {
             this.petSprite.play(animKey);
         }
 
