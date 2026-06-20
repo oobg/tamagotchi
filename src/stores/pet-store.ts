@@ -8,7 +8,7 @@ import { clampStat } from "@/features/pet/logic/clamp";
 import { HEAL_RECOVERY_THRESHOLD } from "@/features/pet/logic/constants";
 import { EventBus } from "@/game/EventBus";
 
-export type PetActionEvent = "eating" | "playing";
+export type PetActionEvent = "eating" | "playing" | "cleaning" | "healing" | "toilet";
 
 const INITIAL_STATS = {
     hunger: 70,
@@ -92,16 +92,18 @@ export const usePetStore = create<PetStore>()(
 
             wake: () => set((state) => mutate(state, (pet) => ({ ...pet, isSleeping: false }))),
 
-            clean: () =>
+            clean: () => {
                 set((state) =>
                     mutate(state, (pet) => ({
                         ...pet,
                         hygiene: clampStat(pet.hygiene + 35),
                         poopCount: Math.max(0, pet.poopCount - 1),
                     })),
-                ),
+                );
+                EventBus.emit("pet:action", "cleaning" satisfies PetActionEvent);
+            },
 
-            heal: () =>
+            heal: () => {
                 set((state) =>
                     mutate(state, (pet) => {
                         const health = clampStat(pet.health + 30);
@@ -111,16 +113,20 @@ export const usePetStore = create<PetStore>()(
                             isSick: health >= HEAL_RECOVERY_THRESHOLD ? false : pet.isSick,
                         };
                     }),
-                ),
+                );
+                EventBus.emit("pet:action", "healing" satisfies PetActionEvent);
+            },
 
-            toilet: () =>
+            toilet: () => {
                 set((state) =>
                     mutate(state, (pet) => ({
                         ...pet,
                         poopCount: 0,
                         hygiene: clampStat(pet.hygiene + 10),
                     })),
-                ),
+                );
+                EventBus.emit("pet:action", "toilet" satisfies PetActionEvent);
+            },
 
             resetPet: () =>
                 set((state) => ({

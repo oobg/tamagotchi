@@ -52,6 +52,9 @@ export const TOPEMA_SHEETS = {
     dirty: sheet("dirty"),
     eating: sheet("eating"),
     playing: sheet("playing"),
+    cleaning: sheet("cleaning"),
+    healing: sheet("healing"),
+    toilet: sheet("toilet"),
 } as const satisfies Record<string, TopemaSheetMeta>;
 
 export type TopemaSheetName = keyof typeof TOPEMA_SHEETS;

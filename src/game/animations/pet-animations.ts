@@ -9,6 +9,9 @@ export const PET_ANIM_KEY = {
     dirty: "pet-dirty",
     eating: "pet-eating",
     playing: "pet-playing",
+    cleaning: "pet-cleaning",
+    healing: "pet-healing",
+    toilet: "pet-toilet",
 } as const;
 
 export type PetAnimKey = (typeof PET_ANIM_KEY)[keyof typeof PET_ANIM_KEY];
@@ -34,6 +37,9 @@ export const PET_ANIM_DEFS: PetAnimDefinition[] = [
     { key: PET_ANIM_KEY.dirty,    sheetKey: "topema-dirty",    frames: ALL_FRAMES, frameRate: 3, repeat: -1 },
     { key: PET_ANIM_KEY.eating,   sheetKey: "topema-eating",   frames: ALL_FRAMES, frameRate: 5, repeat: 0 },
     { key: PET_ANIM_KEY.playing,  sheetKey: "topema-playing",  frames: ALL_FRAMES, frameRate: 5, repeat: 0 },
+    { key: PET_ANIM_KEY.cleaning, sheetKey: "topema-cleaning", frames: ALL_FRAMES, frameRate: 5, repeat: 0 },
+    { key: PET_ANIM_KEY.healing,  sheetKey: "topema-healing",  frames: ALL_FRAMES, frameRate: 5, repeat: 0 },
+    { key: PET_ANIM_KEY.toilet,   sheetKey: "topema-toilet",   frames: ALL_FRAMES, frameRate: 5, repeat: 0 },
 ];
 
 export function moodAnimKey(mood: PetMood): PetAnimKey {
