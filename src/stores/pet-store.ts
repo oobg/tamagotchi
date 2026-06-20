@@ -21,7 +21,7 @@ const INITIAL_STATS = {
 function createInitialPet(now: number, generation = 1): PetState {
     return {
         id: `pet-${now}`,
-        name: "Tama",
+        name: "토페마",
         stage: "egg",
         ...INITIAL_STATS,
         careMissCount: 0,
