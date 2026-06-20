@@ -121,11 +121,17 @@ export function TamagotchiShell() {
     );
 
     return (
-        <div className="flex h-full w-full items-center justify-center overflow-hidden bg-zinc-950 p-4">
-            <div className="relative" style={{ width: 380, height: 520 }}>
+        <div
+            className="flex w-full items-center justify-center overflow-hidden bg-zinc-950"
+            style={{ minHeight: "100dvh" }}
+        >
+            <div
+                className="relative"
+                style={{ width: SHELL_W, height: SHELL_H }}
+            >
                 <div
                     className="absolute left-1/2 z-10 -translate-x-1/2"
-                    style={{ top: -6 }}
+                    style={{ top: 0 }}
                 >
                     <LeafTop />
                 </div>
@@ -141,27 +147,29 @@ export function TamagotchiShell() {
                         <div className="pointer-events-none absolute inset-0">
                             <div
                                 className="absolute left-0 right-0 top-0 flex items-center justify-between px-2 py-1 font-mono"
-                                style={{ color: "#1f2c14", fontSize: 10, letterSpacing: 0.5 }}
+                                style={{ color: "#1f2c14", fontSize: 10, letterSpacing: 0.4 }}
                             >
                                 <span>
                                     {STAGE_LABEL[pet.stage]} · {progress}%
                                 </span>
-                                <span>{pet.name}</span>
+                                <span style={{ fontWeight: 600 }}>{pet.name}</span>
                                 <span>놓침 {pet.careMissCount}</span>
                             </div>
 
                             <div
-                                className="absolute right-1 top-6 flex flex-col gap-[3px] font-mono"
-                                style={{ color: "#1f2c14", fontSize: 9 }}
+                                className="absolute right-1 flex flex-col gap-[3px] font-mono"
+                                style={{ color: "#1f2c14", fontSize: 9, top: 24 }}
                             >
                                 {STAT_ROWS.map((s) => (
                                     <div key={s.key} className="flex items-center gap-1">
-                                        <span style={{ width: 10 }}>{s.icon}</span>
+                                        <span style={{ width: 10, textAlign: "center" }}>
+                                            {s.icon}
+                                        </span>
                                         <div
                                             className="overflow-hidden rounded-sm"
                                             style={{
-                                                width: 32,
-                                                height: 4,
+                                                width: 36,
+                                                height: 5,
                                                 background: "rgba(31,44,20,0.25)",
                                                 border: "1px solid #1f2c14",
                                             }}
@@ -179,8 +187,8 @@ export function TamagotchiShell() {
                             </div>
 
                             <div
-                                className="absolute left-1 top-6 flex flex-col gap-1 font-mono"
-                                style={{ color: "#1f2c14", fontSize: 9 }}
+                                className="absolute left-1 flex flex-col gap-0.5 font-mono"
+                                style={{ color: "#1f2c14", fontSize: 9, top: 24 }}
                             >
                                 {pet.isSleeping ? <span>💤 자는 중</span> : null}
                                 {pet.isSick ? <span>🤒 아파요</span> : null}
@@ -188,26 +196,32 @@ export function TamagotchiShell() {
                             </div>
 
                             <div
-                                className="absolute bottom-0 left-0 right-0 flex items-end justify-around px-1 pb-[3px]"
+                                className="absolute bottom-0 left-0 right-0 flex items-end justify-around px-1 pb-1"
                                 style={{ color: "#1f2c14" }}
                             >
                                 {sleepingMenu.map((m, i) => (
                                     <div
                                         key={m.key}
                                         className="flex flex-col items-center"
-                                        style={{ width: 36 }}
+                                        style={{ width: 32 }}
                                     >
                                         <span
                                             style={{
                                                 display: "inline-block",
-                                                width: 22,
-                                                height: 22,
-                                                lineHeight: "22px",
+                                                width: 24,
+                                                height: 24,
+                                                lineHeight: "24px",
                                                 textAlign: "center",
                                                 fontSize: 14,
-                                                borderRadius: 4,
+                                                borderRadius: 5,
                                                 background:
-                                                    i === idx ? "#1f2c14" : "rgba(31,44,20,0.08)",
+                                                    i === idx
+                                                        ? "#1f2c14"
+                                                        : "rgba(31,44,20,0.08)",
+                                                boxShadow:
+                                                    i === idx
+                                                        ? "0 0 0 2px #c2d491, 0 0 0 3px #1f2c14"
+                                                        : "none",
                                                 filter: i === idx ? "none" : "grayscale(0.4)",
                                                 opacity: i === idx ? 1 : 0.85,
                                             }}
@@ -217,7 +231,11 @@ export function TamagotchiShell() {
                                         {i === idx ? (
                                             <span
                                                 className="font-mono"
-                                                style={{ fontSize: 8, marginTop: 1 }}
+                                                style={{
+                                                    fontSize: 9,
+                                                    marginTop: 1,
+                                                    fontWeight: 600,
+                                                }}
                                             >
                                                 {m.label}
                                             </span>
@@ -231,7 +249,12 @@ export function TamagotchiShell() {
 
                 <div
                     className="absolute flex items-center justify-around"
-                    style={{ left: 60, right: 60, top: 400, height: 60 }}
+                    style={{
+                        left: 56,
+                        right: 56,
+                        top: BUTTON_ROW_TOP,
+                        height: 64,
+                    }}
                 >
                     <HwButton ariaLabel="이전" onClick={prev}>
                         ◀
@@ -248,8 +271,19 @@ export function TamagotchiShell() {
     );
 }
 
+// 디바이스 셸은 LCD를 충분히 감싸도록 LCD 폭의 약 1.45배로 잡는다.
+// (화면 자체 크기는 유지하고, 셸이 화면을 여유 있게 둘러싸야 다마고치 비례.)
+const SHELL_W = 372;
+const SHELL_H = 532;
+const SHELL_BODY_TOP = 36;
+const LCD_W = 256;
+const LCD_H = 224;
+const LCD_LEFT = (SHELL_W - LCD_W) / 2;
+const LCD_TOP = 140;
+const BUTTON_ROW_TOP = LCD_TOP + LCD_H + 38;
+
 const SHELL_STYLE: CSSProperties = {
-    top: 24,
+    top: SHELL_BODY_TOP,
     left: 0,
     right: 0,
     bottom: 0,
@@ -262,13 +296,13 @@ const SHELL_STYLE: CSSProperties = {
 };
 
 const LCD_FRAME_STYLE: CSSProperties = {
-    top: 90,
-    left: 50,
-    width: 280,
-    height: 240,
+    top: LCD_TOP,
+    left: LCD_LEFT,
+    width: LCD_W,
+    height: LCD_H,
     background: "#3a4a2a",
-    borderRadius: 14,
-    padding: 5,
+    borderRadius: 16,
+    padding: 6,
     boxShadow:
         "inset 2px 2px 5px rgba(0,0,0,0.7), inset -2px -2px 4px rgba(255,255,255,0.05), 0 2px 0 rgba(255,255,255,0.35)",
     border: "2px solid #2a3a1a",
@@ -291,13 +325,13 @@ function HwButton({
     primary?: boolean;
     ariaLabel: string;
 }) {
-    const size = primary ? 56 : 48;
+    const size = primary ? 62 : 54;
     return (
         <button
             type="button"
             onClick={onClick}
             aria-label={ariaLabel}
-            className="select-none transition-transform active:translate-y-[3px]"
+            className="select-none transition-transform active:translate-y-[2px]"
             style={{
                 width: size,
                 height: size,
@@ -306,7 +340,7 @@ function HwButton({
                     "radial-gradient(circle at 32% 28%, #ffe87a 0%, #e9c34a 45%, #b48a18 80%, #7c5d10 100%)",
                 border: "2px solid #6e520e",
                 boxShadow:
-                    "inset -3px -4px 6px rgba(60,40,0,0.4), inset 3px 3px 5px rgba(255,255,200,0.5), 0 5px 0 #6e520e, 0 6px 8px rgba(0,0,0,0.4)",
+                    "inset -2px -3px 5px rgba(60,40,0,0.4), inset 2px 2px 4px rgba(255,255,200,0.55), 0 4px 0 #6e520e, 0 6px 8px rgba(0,0,0,0.4)",
                 color: "#5a4408",
                 fontFamily: "monospace",
                 fontWeight: 700,
@@ -322,7 +356,7 @@ function HwButton({
 
 function LeafTop() {
     return (
-        <svg width="170" height="90" viewBox="0 0 170 90" fill="none" aria-hidden>
+        <svg width="180" height="92" viewBox="0 0 170 90" fill="none" aria-hidden>
             <defs>
                 <linearGradient id="leafGrad" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="0%" stopColor="#7ab84d" />

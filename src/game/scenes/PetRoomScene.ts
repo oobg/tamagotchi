@@ -75,16 +75,16 @@ export class PetRoomScene extends Scene {
         const centerX = width / 2;
         // LCD 화면 안에서 펫이 중앙에 보이도록. 위·아래 HTML 오버레이를 피해
         // 살짝 아래쪽에 자리를 잡아 펫 위로 mood 말풍선이 들어올 공간을 둔다.
-        this.baseY = height * 0.66;
+        this.baseY = height * 0.78;
 
         this.petSprite = this.add
             .sprite(centerX, this.baseY, INITIAL_SHEET_KEY, 0)
             .setOrigin(0.5, 0.95);
 
         this.petBubble = this.add
-            .text(centerX, this.baseY - 220, "", {
+            .text(centerX, this.baseY - 110, "", {
                 fontFamily: "monospace",
-                fontSize: "28px",
+                fontSize: "18px",
                 color: "#1f2c14",
             })
             .setOrigin(0.5);
@@ -140,10 +140,10 @@ export class PetRoomScene extends Scene {
 
     private renderPoops(count: number) {
         this.poopGroup.clear(true, true);
-        const baseX = this.scale.width / 2 + 110;
-        const y = this.baseY - 8;
+        const baseX = this.scale.width / 2 + 50;
+        const y = this.baseY - 4;
         for (let i = 0; i < Math.min(count, 5); i += 1) {
-            const dot = this.add.circle(baseX + i * 18, y, 6, 0x4a3322);
+            const dot = this.add.circle(baseX + i * 12, y, 4, 0x4a3322);
             this.poopGroup.add(dot);
         }
     }

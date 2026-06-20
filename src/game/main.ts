@@ -3,8 +3,9 @@ import { PetRoomScene } from "./scenes/PetRoomScene";
 
 const config: Phaser.Types.Core.GameConfig = {
     type: AUTO,
-    width: 480,
-    height: 480,
+    // LCD 내부 비율(256×224)에 맞춰 캔버스를 잡아 letterbox 없이 꽉 차게 한다.
+    width: 256,
+    height: 224,
     parent: "game-container",
     // 다마고치 셸의 LCD 녹색이 그대로 비치도록 캔버스를 투명으로 둔다.
     transparent: true,
